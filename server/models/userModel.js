@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import bcrypt from 'bcrypt'
+import bcryptjs from 'bcryptjs'
 import _ from 'lodash'
 import * as ErrorCodes from '../errorcodes'
 import AppError from '../AppError'
@@ -29,7 +29,7 @@ userSchema.statics.saveUser = async usrObj => {
     if (count !== 0)
         throw new Error("Email already registered with another user")
 
-    usrObj.password = await bcrypt.hash(usrObj.password, 10)
+    usrObj.password = await bcryptjs.hash(usrObj.password, 10)
     return await UserModel.create(usrObj)
 }
 

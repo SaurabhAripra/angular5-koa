@@ -1,0 +1,13 @@
+{
+  "presets": [],
+  "plugins": [],
+  "env": {
+    "server": {
+      "plugins": []
+    },
+    "client":{
+      "presets": [],
+      "plugins":[]
+    }
+  }
+}

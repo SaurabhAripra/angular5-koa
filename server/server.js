@@ -24,7 +24,7 @@ co(async () => {
     try {
         mongoose.Promise = global.Promise
         await mongoose.connect(conf.mongo.url, {
-            "useMongoClient": conf.mongo.useMongoClient
+
         })
         logger.info("Connection to database Successful!")
     } catch (error) {
@@ -93,17 +93,18 @@ co(async () => {
         }
     ));
 
+    console.log("dir name is ", __dirname)
 
     // Cache public resources on production
 
     if (process.env.NODE_ENV && process.env.NODE_ENV == PROD_ENV) {
         // Public files would be served from public folder (js,css, images etc), with max age as 1 year
-        app.use(staticCache(path.join(__dirname, '..', 'public'), {
+        app.use(staticCache(path.join(__dirname, 'public'), {
             maxAge: 365 * 24 * 60 * 60
         }))
     } else {
         // For dev environment no caching of files would be done
-        app.use(staticCache(path.join(__dirname, '..', 'public'), {
+        app.use(staticCache(path.join(__dirname, 'public'), {
             maxAge: 0
         }))
     }

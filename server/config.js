@@ -14,7 +14,7 @@ const config = {
     },
     mongo:{
         default:{
-            url:'mongodb://localhost/nnxt',
+            url:'mongodb://localhost/angularkoa',
             useMongoClient:true
         }
     }
