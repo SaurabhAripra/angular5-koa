@@ -43,3 +43,12 @@ testem.log
 .DS_Store
 Thumbs.db
 combined.log
+server/public/main.bundle.js.map
+server/public/main.bundle.js
+server/public/inline.bundle.js.map
+server/public/vendor.bundle.js.map
+server/public/vendor.bundle.js
+server/public/styles.bundle.js.map
+server/public/styles.bundle.js
+server/public/polyfills.bundle.js.map
+server/public/polyfills.bundle.js
