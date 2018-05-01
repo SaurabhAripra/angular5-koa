@@ -11,6 +11,7 @@ import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import {LoginComponent} from './login/login.component';
 import {HomeComponent} from './home/home.component';
 import {LoginService} from './login.service';
+import {HttpClientModule} from "@angular/common/http"
 
 
 @NgModule({
@@ -24,7 +25,8 @@ import {LoginService} from './login.service';
     BrowserModule,
     AppRoutingModule,
     NgbModule.forRoot(),
-    FormsModule
+    FormsModule,
+    HttpClientModule
   ],
   providers: [
     LoginService

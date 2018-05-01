@@ -14,16 +14,12 @@ export class LoginComponent implements OnInit {
   model = new LoginData('', '');
   submitted = false
 
-  ngOnInit() {
-
-  }
+  ngOnInit() {}
 
   onSubmit() {
     console.log('LoginComponent-> on submit called');
+    this.loginService.authenticate(this.model.email, this.model.password).subscribe();
     this.submitted = true;
-
   }
-
-  get diagnostic() { return JSON.stringify(this.model); }
 
 }
