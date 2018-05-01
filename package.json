@@ -5,7 +5,7 @@
   "scripts": {
     "ng": "ng",
     "start": "set BABEL_ENV=server&set NODE_ENV=development&nodemon ./server/server.js --exec babel-node --presets es2015",
-    "client.dev.build": "ng build",
+    "client.dev.build": "ng build -op server/public -w",
     "client.prod.build": "ng build --prod",
     "test": "ng test",
     "lint": "ng lint",
