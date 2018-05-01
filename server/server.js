@@ -142,12 +142,15 @@ co(async () => {
     });
 
 
-    // All server pages (including server side rendering pages)
-    app.use(pageRouter.routes())
-    // All APIs starts with /api
+    // All APIs starts with /api, api router is kept before page router as page router would return index page on all url
+    // hence it api router is kept before to ensure that get call on api returns appropriate result and not index page
     app.use(apiRouter.routes())
 
-    app.listen(conf.server.port, () => {
+    // All server pages (including server side rendering pages)
+    app.use(pageRouter.routes())
+
+
+  app.listen(conf.server.port, () => {
         logger.info('Server started on %s', conf.server.port)
     })
 })
