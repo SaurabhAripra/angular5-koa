@@ -8,7 +8,7 @@ export const isAuthenticated = (ctx) => {
 
 export const isSuperAdmin = (ctx) => {
     if (ctx.isAuthenticated()) {
-        if (ctx.state.user && Array.isArray(ctx.state.user.roles) && ctx.state.user.roles.findIndex(r => r.role == ROLE_SUPER_ADMIN) != -1)
+        if (ctx.state.user && Array.isArray(ctx.state.user.roles) && ctx.state.user.roles.findIndex(r => r.name == ROLE_SUPER_ADMIN) != -1)
             return true
     }
     return false
@@ -16,10 +16,8 @@ export const isSuperAdmin = (ctx) => {
 
 export const isAdmin = (ctx) => {
     if (ctx.isAuthenticated()) {
-        if (ctx.state.user && Array.isArray(ctx.state.user.roles) && ctx.state.user.roles.findIndex(r => r.role == ROLE_ADMIN) != -1)
+        if (ctx.state.user && Array.isArray(ctx.state.user.roles) && ctx.state.user.roles.findIndex(r => r.name == ROLE_ADMIN) != -1)
             return true
     }
     return false
 }
-
-

@@ -11,11 +11,21 @@ import confFile from './config'
 import co from 'co'
 import mongoose from 'mongoose'
 import {userRouter} from "./routers"
-import {UserModel} from "./models"
-import {PROD_ENV, DEV_ENV, ROLE_ADMIN,ROLE_SUPER_ADMIN} from "./serverconstants"
+import {UserModel, RoleModel} from "./models"
+import {
+    PROD_ENV,
+    DEV_ENV,
+    ROLE_ADMIN,
+    ROLE_SUPER_ADMIN,
+    ROLE_APP_USER,
+    SUPER_ADMIN_EMAIL,
+    ADMIN_EMAIL,
+    APP_USER_EMAIL
+} from "./serverconstants"
 import path from 'path'
 import logger from './logger'
 import {apiRouter, pageRouter} from "./routers"
+import {HTTP_SERVER_ERROR} from "./errorcodes"
 
 // Initializing configuration first and then starting application
 co(async () => {
@@ -24,7 +34,7 @@ co(async () => {
     try {
         mongoose.Promise = global.Promise
         await mongoose.connect(conf.mongo.url, {
-
+            "useMongoClient": conf.mongo.useMongoClient
         })
         logger.info("Connection to database Successful!")
     } catch (error) {
@@ -32,41 +42,68 @@ co(async () => {
         return
     }
 
-    if (conf.server.createAdmin) {
-        if (!await UserModel.exists('admin@test.com')) {
+    if (conf.server.setupData) {
 
-            // create user
-            await UserModel.saveUser({
-                email: 'admin@test.com',
-                firstName: "Administrator",
-                roles: [{role: ROLE_ADMIN}],
-                password: "admin"
+        if (!await RoleModel.exists(ROLE_ADMIN)) {
+            await RoleModel.saveRole({
+                name: ROLE_ADMIN
             })
-
-
-            logger.info("#### CREATED ADMIN USER FOR TESTING ####")
-            logger.info("LOGIN USING admin@test.com/admin")
         }
 
-        if (!await UserModel.exists('superadmin@test.com')) {
+        if (!await RoleModel.exists(ROLE_SUPER_ADMIN)) {
+            await RoleModel.saveRole({
+                name: ROLE_SUPER_ADMIN
+            })
+        }
+
+        if (!await RoleModel.exists(ROLE_APP_USER)) {
+            await RoleModel.saveRole({
+                name: ROLE_APP_USER
+            })
+        }
+
+        if (!await UserModel.exists(ADMIN_EMAIL)) {
+            let adminRole = await RoleModel.findOne({name: ROLE_ADMIN})
 
             // create user
             await UserModel.saveUser({
-                email: 'superadmin@test.com',
-                firstName: "Super",
-                lastName: "Administrator",
-                roles: [{role: ROLE_SUPER_ADMIN}],
+                email: ADMIN_EMAIL,
+                firstName: "App",
+                lastName: "Admin",
+                roles: [adminRole],
                 password: "admin"
             })
+        }
 
+        if (!await UserModel.exists(SUPER_ADMIN_EMAIL)) {
 
-            logger.info("#### CREATED SUPER ADMIN USER FOR TESTING ####")
-            logger.info("LOGIN USING superadmin@test.com/admin")
+            let superAdminRole = await RoleModel.findOne({name: ROLE_SUPER_ADMIN})
+            // create user
+            await UserModel.saveUser({
+                email: SUPER_ADMIN_EMAIL,
+                firstName: "Super",
+                lastName: "Admin",
+                roles: [superAdminRole],
+                password: "admin"
+            })
+        }
+
+        if (!await UserModel.exists(APP_USER_EMAIL)) {
+            let appUserRole = await RoleModel.findOne({name: ROLE_APP_USER})
+            // create user
+            await UserModel.saveUser({
+                email: APP_USER_EMAIL,
+                firstName: "App",
+                lastName: "User",
+                roles: [appUserRole],
+                password: "appuser"
+            })
         }
     }
 
 
     let app = new Koa()
+
     app.use(cookie())
     app.use(koaBody({multipart: true, formidable: {keepExtensions: true}}))
     app.keys = ['A secret that no one knows']
@@ -86,14 +123,11 @@ co(async () => {
             extension: 'mustache',
             debug: true,
             options: {
-                partials: {
-                    header: 'header'
-                }
+                partials: {}
             }
         }
     ));
 
-    console.log("dir name is ", __dirname)
 
     // Cache public resources on production
 
@@ -125,10 +159,11 @@ co(async () => {
 
         } catch (err) {
             logger.error("Server ERROR:", {error: err})
-            ctx.status = err.status || 500;
+            ctx.status = err.status || HTTP_SERVER_ERROR
             ctx.body = ctx.body = {
                 success: false,
-                code: err.code
+                code: err.code,
+                message: err.message
             }
             ctx.app.emit('error', err, ctx);
         }
@@ -142,15 +177,12 @@ co(async () => {
     });
 
 
-    // All APIs starts with /api, api router is kept before page router as page router would return index page on all url
-    // hence it api router is kept before to ensure that get call on api returns appropriate result and not index page
-    app.use(apiRouter.routes())
-
     // All server pages (including server side rendering pages)
     app.use(pageRouter.routes())
+    // All APIs starts with /api
+    app.use(apiRouter.routes())
 
-
-  app.listen(conf.server.port, () => {
+    app.listen(conf.server.port, () => {
         logger.info('Server started on %s', conf.server.port)
     })
 })
